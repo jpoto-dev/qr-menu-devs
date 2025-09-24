@@ -117,8 +117,8 @@ ORDER BY
 ;
 ```
 ### Requerimientos
-- [ ] Filtro de fecha
-- [ ] Filtro de tiendas
+- [X] Filtro de fecha
+- [X] Filtro de tiendas
 - [ ] Cantidad de documentos emitidos en una tabla
 - [ ] Documentos por tipo en una tabla
 - [ ] Visualizacion de totales en grafico X/Y

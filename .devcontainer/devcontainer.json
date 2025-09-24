@@ -5,5 +5,16 @@
     "workspaceFolder": "/opt/app",
     "forwardPorts": [8000],
     "shutdownAction": "stopCompose",
-    "postCreateCommand": "composer install"
+    "postCreateCommand": "composer install",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode-remote.remote-containers",
+                "bmewburn.vscode-intelephense-client",
+                "esbenp.prettier-vscode",
+                "TheNouillet.symfony-vscode",
+                "kilocode.kilo-code"
+            ]
+        }
+    }
 }
