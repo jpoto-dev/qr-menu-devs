@@ -7,60 +7,8 @@
 
     {% include 'documents/_filters.html.twig' %}
 
-    <h2>BF NC O</h2>
-    {% if bf_nc_o is empty %}
-        <p>No BF NC O documents found.</p>
-    {% else %}
-        <table id="bf-nc-o-table">
-            <thead>
-                <tr>
-                    {% for key in bf_nc_o[0]|keys %}
-                        <th>{{ key }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for document in bf_nc_o %}
-                    <tr>
-                        {% for value in document %}
-                            <td>{{ value }}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
-
-    <h2>BF O</h2>
-    {% if bf_o is empty %}
-        <p>No BF O documents found.</p>
-    {% else %}
-        <table id="bf-o-table">
-            <thead>
-                <tr>
-                    {% for key in bf_o[0]|keys %}
-                        <th>{{ key }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for document in bf_o %}
-                    <tr>
-                        {% for value in document %}
-                            <td>{{ value }}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+    {% include 'documents/_issued_documents.html.twig' %}
 {% endblock %}
 {% block javascripts %}
 {{ parent() }}
-<script>
-$(document).ready(function() {
-    $('#bf-nc-o-table').DataTable();
-    $('#bf-o-table').DataTable();
-});
-</script>
 {% endblock %}
