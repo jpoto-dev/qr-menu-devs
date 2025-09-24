@@ -3,13 +3,15 @@
 ## Dependencias
 - PHP 7.2.34
 - Symfony 5.2
-- symfony/webpack-encore-bundle
-- apexcharts 
+- Apex Charts 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 ```
-- datatables
+- DataTables
 ```html
+ <link href="https://cdn.datatables.net/v/dt/dt-2.3.4/datatables.min.css" rel="stylesheet" integrity="sha384-pmGS6IIcXhAVIhcnh9X/mxffzZNHbuxboycGuQQoP3pAbb0SwlSUUHn2v22bOenI" crossorigin="anonymous">
+ 
+<script src="https://cdn.datatables.net/v/dt/dt-2.3.4/datatables.min.js" integrity="sha384-X2pTSfom8FUa+vGQ+DgTCSyBZYkC1RliOduHa0X96D060s7Q//fnOh3LcazRNHyo" crossorigin="anonymous"></script>
 ```
 
 

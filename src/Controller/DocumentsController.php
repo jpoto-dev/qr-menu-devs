@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class DocumentsController extends AbstractController
 {
-    public function number(ManagerRegistry $doctrine): Response
+    public function index(ManagerRegistry $doctrine): Response
     {
         $conn = $doctrine->getConnection();
         $sqlFile = __DIR__ . '/../../queries/bf_nc_o.sql';
@@ -23,7 +23,7 @@ class DocumentsController extends AbstractController
         ]);
         $results = $result->fetchAllAssociative();
 
-        return $this->render('documents/number.html.twig', [
+        return $this->render('documents/index.html.twig', [
             'documents' => $results
         ]);
     }
