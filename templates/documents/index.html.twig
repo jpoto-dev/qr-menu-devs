@@ -5,6 +5,8 @@
 {% block body %}
     <h1>Documents</h1>
 
+    {% include 'documents/_filters.html.twig' %}
+
     <h2>BF NC O</h2>
     {% if bf_nc_o is empty %}
         <p>No BF NC O documents found.</p>

@@ -1,0 +1,9 @@
+<form method="get" action="{{ path('app_documents') }}">
+    <label for="tiendas">Tiendas (separadas por coma):</label><br>
+    <input type="text" id="tiendas" name="tiendas" value="{{ current_tiendas }}"><br>
+    <label for="fecha_inicio">Fecha Inicio:</label><br>
+    <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ current_fecha_inicio }}"><br>
+    <label for="fecha_fin">Fecha Fin:</label><br>
+    <input type="date" id="fecha_fin" name="fecha_fin" value="{{ current_fecha_fin }}"><br>
+    <button type="submit">Filtrar</button>
+</form>
