@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Documents{% endblock %}
+
+{% block body %}
+    <h1>Documents</h1>
+    {% if documents is empty %}
+        <p>No documents found.</p>
+    {% else %}
+        <table border="1">
+            <thead>
+                <tr>
+                    {% for key in documents[0]|keys %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for document in documents %}
+                    <tr>
+                        {% for value in document %}
+                            <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
