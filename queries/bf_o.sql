@@ -50,8 +50,6 @@ LEFT JOIN orden AS O ON
 	AND DTE.orden_id = O.id 
 WHERE 1=1
 	AND DTE.tienda_id IN (:tiendas)
-	AND (DTE.fecha >= :fecha_inicio)
-	AND (DTE.fecha < :fecha_fin)
-ORDER BY 
-	DTE.fecha ASC
+	AND (DTE.created >= :fecha_inicio)
+	AND (DTE.created < :fecha_fin)
 ;

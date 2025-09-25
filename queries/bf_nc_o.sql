@@ -38,7 +38,5 @@ LEFT JOIN orden AS O ON
 WHERE 1=1
 	AND DTE.tienda_id in (:tiendas)
 	AND DTER.dte = 61
-	AND (DTERV.fecha >= :fecha_inicio)
-	AND (DTERV.fecha < :fecha_fin)
-ORDER BY 
-	DTERV.fecha ASC
+	AND (DTER.created >= :fecha_inicio)
+	AND (DTER.created < :fecha_fin)
