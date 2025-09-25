@@ -33,9 +33,15 @@ SELECT
 	O.dte_folio AS orden_dte_folio, 
 	O.dte_tipo AS orden_dte_tipo, 
 	O.dte_status AS orden_dte_status,
-	O.monto AS orden_monto,
+	CASE
+		WHEN O.monto = DTE.neto AND O.dte = 33 THEN ROUND(O.monto * 1.19, 0)
+		ELSE O.monto
+	END AS orden_monto,
 	O.descuento AS orden_descuento,
-	O.total AS orden_total,
+	CASE
+		WHEN O.monto = DTE.neto AND O.dte = 33 THEN ROUND((O.total - O.propina) * 1.19, 0)
+		ELSE O.total
+	END AS orden_total,
 	O.propina AS orden_propina,
 	O.garzon_id AS orden_garzon_id
 FROM dte_emitido as DTE
