@@ -1,0 +1,132 @@
+{% set bf_o_data = bf_o %}
+<h3>Cantidad estado ordenes por tipo de documento</h3>
+<div class="order-status-grouping-table">
+    <table id="orderStatusGroupingTable">
+        <thead>
+            <tr>
+                <th>Estado</th>
+                <!-- Column headers for dte_tipo will be populated by JavaScript -->
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bfOData = {{ bf_o_data|json_encode|raw }};
+
+    // Filter data
+    const filtered = bfOData.filter(item =>
+        item.dte_revision_estado &&
+        (item.dte_revision_estado.startsWith('DTE') ||
+         item.dte_revision_estado.startsWith('EPR') ||
+         item.dte_revision_estado.startsWith('RPR') ||
+         item.dte_revision_estado.startsWith('RLV')) &&
+        item.dte_orden_id != null
+    );
+
+    // Group by orden_estado and dte_tipo
+    const grouped = {};
+    filtered.forEach(item => {
+        const estado = item.orden_estado;
+        const tipo = item.dte_tipo;
+        if (!grouped[estado]) grouped[estado] = {};
+        if (!grouped[estado][tipo]) grouped[estado][tipo] = 0;
+        grouped[estado][tipo]++;
+    });
+
+    // Get unique estados and tipos
+    const estados = Object.keys(grouped).sort();
+    const tipos = [...new Set(filtered.map(item => item.dte_tipo))].sort();
+
+    // Compute totals
+    const estadoTotals = {};
+    estados.forEach(estado => {
+        estadoTotals[estado] = Object.values(grouped[estado]).reduce((a, b) => a + b, 0);
+    });
+
+    const tipoTotals = {};
+    tipos.forEach(tipo => {
+        tipoTotals[tipo] = estados.reduce((sum, estado) => sum + (grouped[estado][tipo] || 0), 0);
+    });
+
+    const total = Object.values(tipoTotals).reduce((a, b) => a + b, 0);
+
+    // Build table header
+    const thead = document.querySelector('#orderStatusGroupingTable thead tr');
+    tipos.forEach(tipo => {
+        const th = document.createElement('th');
+        th.textContent = tipo;
+        thead.appendChild(th);
+    });
+    const totalTh = document.createElement('th');
+    totalTh.textContent = 'Total';
+    thead.appendChild(totalTh);
+
+    // Build table body
+    const tableBody = document.getElementById('tableBody');
+    estados.forEach(estado => {
+        const row = document.createElement('tr');
+        const estadoTd = document.createElement('td');
+        estadoTd.textContent = estado;
+        row.appendChild(estadoTd);
+
+        tipos.forEach(tipo => {
+            const td = document.createElement('td');
+            td.textContent = grouped[estado][tipo] || 0;
+            row.appendChild(td);
+        });
+
+        const totalTd = document.createElement('td');
+        totalTd.textContent = estadoTotals[estado];
+        row.appendChild(totalTd);
+
+        tableBody.appendChild(row);
+    });
+
+    // Add total row
+    const totalRow = document.createElement('tr');
+    const totalLabelTd = document.createElement('td');
+    totalLabelTd.innerHTML = '<strong>Total</strong>';
+    totalRow.appendChild(totalLabelTd);
+
+    tipos.forEach(tipo => {
+        const td = document.createElement('td');
+        td.innerHTML = `<strong>${tipoTotals[tipo]}</strong>`;
+        totalRow.appendChild(td);
+    });
+
+    const grandTotalTd = document.createElement('td');
+    grandTotalTd.innerHTML = `<strong>${total}</strong>`;
+    totalRow.appendChild(grandTotalTd);
+
+    tableBody.appendChild(totalRow);
+});
+</script>
+
+<style>
+.order-status-grouping-table {
+    width: 100%;
+    overflow-x: auto;
+}
+#orderStatusGroupingTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+#orderStatusGroupingTable th, #orderStatusGroupingTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+#orderStatusGroupingTable th {
+    background-color: #f2f2f2;
+}
+@media (max-width: 768px) {
+    .order-status-grouping-table {
+        font-size: 14px;
+    }
+}
+</style>

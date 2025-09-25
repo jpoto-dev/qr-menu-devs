@@ -11,9 +11,6 @@
         <tbody id="mopTableBody">
             <!-- Rows will be populated by JavaScript -->
         </tbody>
-        <tfoot id="tableFooter">
-            <!-- Footer will be populated by JavaScript -->
-        </tfoot>
     </table>
 </div>
 
@@ -106,11 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
     totalRow.innerHTML = totalRowHtml;
     tableBody.appendChild(totalRow);
 
-    // Add footer
-    const tableFooter = document.getElementById('tableFooter');
-    const footerRow = document.createElement('tr');
-    footerRow.innerHTML = `<td colspan="${tipos.length + 2}">Total: ${formatCurrency(grandTotal)}</td>`;
-    tableFooter.appendChild(footerRow);
 });
 </script>
 

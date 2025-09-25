@@ -13,4 +13,3 @@ Table:
 * add an additional row to sum values per 'dte_tipo'
 * add an additional column to sum values per 'orden_medio_pago'
 * show the values as currency ($) using browser locale for thousands separator
-* align the currency symbol to the left, align values to right (match thousands separator), truncate to 0 decimal places
