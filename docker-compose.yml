@@ -5,3 +5,5 @@ services:
       - .:/opt/app
     ports:
       - "8000:8000"
+    environment:
+      - PHP_MEMORY_LIMIT=256M
