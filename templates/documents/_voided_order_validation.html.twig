@@ -1,0 +1,114 @@
+{% set bf_nc_o_data = bf_nc_o %}
+
+<h3>Ordenes acreditadas pero no anuladas</h3>
+<div class="validation-table-container">
+    <table id="voidedOrderValidationTable" class="display">
+        <thead>
+            <tr>
+                <th>Orden</th>
+                <th>Tipo DTE</th>
+                <th>Folio DTE</th>
+                <th>Folio nota de credito</th>
+            </tr>
+        </thead>
+        <tbody id="voidedOrderValidationBody">
+            <!-- Populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bfNcOData = {{ bf_nc_o_data|json_encode|raw }};
+
+    // Data transformation
+    let transformedData = bfNcOData.filter(row => {
+        // 1. filter by 'nc_revision_estado' where is not null and starts with DTE, EPR, RPR, or RLV
+        const ncEstado = row.nc_revision_estado;
+        if (!ncEstado || !['DTE', 'EPR', 'RPR', 'RLV'].some(prefix => ncEstado.startsWith(prefix))) return false;
+
+        // 2. filter by 'bf_revision_estado' where is not null and starts with DTE, EPR, RPR, or RLV
+        const bfEstado = row.bf_revision_estado;
+        if (!bfEstado || !['DTE', 'EPR', 'RPR', 'RLV'].some(prefix => bfEstado.startsWith(prefix))) return false;
+
+        return true;
+    });
+
+    // 3. pick uniques 'bf_tipo', 'bf_folio', 'bf_total', 'nc_folio', 'nc_total', 'orden_id', 'orden_estado', 'orden_total'
+    const seen = new Set();
+    transformedData = transformedData.filter(row => {
+        const key = `${row.bf_tipo}-${row.bf_folio}-${row.bf_total}-${row.nc_folio}-${row.nc_total}-${row.orden_id}-${row.orden_estado}-${row.orden_total}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+
+    // 4. filter where 'bf_total' = 'nc_total' and 'nc_total' = 'orden_total'
+    transformedData = transformedData.filter(row => {
+        const bfTotal = parseInt(row.bf_total, 10);
+        const ncTotal = parseInt(row.nc_total, 10);
+        const ordenTotal = parseInt(row.orden_total, 10);
+        return bfTotal === ncTotal && ncTotal === ordenTotal;
+    });
+
+    // 5. lower case 'orden_estado'
+    transformedData = transformedData.map(row => ({
+        ...row,
+        orden_estado: row.orden_estado ? row.orden_estado.toLowerCase() : row.orden_estado
+    }));
+
+    // 6. filter by 'orden_estado' where doesn't contain 'anulado' substring
+    transformedData = transformedData.filter(row => {
+        return row.orden_estado && !row.orden_estado.includes('anulado');
+    });
+
+    // Populate table
+    const body = document.getElementById('voidedOrderValidationBody');
+    transformedData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row.orden_id}</td>
+            <td>${row.bf_tipo}</td>
+            <td>${row.bf_folio}</td>
+            <td>${row.nc_folio}</td>
+        `;
+        body.appendChild(tr);
+    });
+
+    // Initialize DataTable
+    $('#voidedOrderValidationTable').DataTable();
+});
+</script>
+
+<style>
+.validation-table-container {
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.display {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.display th, .display td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.display th {
+    background-color: #f2f2f2;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+    .validation-table-container {
+        font-size: 14px;
+    }
+
+    .display th, .display td {
+        padding: 4px;
+    }
+}
+</style>
