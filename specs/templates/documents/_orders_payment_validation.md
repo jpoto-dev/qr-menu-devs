@@ -10,6 +10,6 @@ Data schema notes:
 Expected output:
 * filter by 'dte_orden_id' where is not null
 * filter by 'dte_revision_estado' where is not null and starts with DTE, EPR, RPR, or RLV
-* three different tables named 'Validacion pago completo', 'Validacion pago separado', 'Validacion pago conjunto'
+* three different tables named 'Validacion pago completo de orden', 'Validacion pago separado de orden', 'Validacion pago multiples ordenes'
 * on each table, show what are the 'orden_id', 'dte_folio' which don't match the total ('dte_total') of the 'orden_id' total, which is computed by substracting the tip from the total ('orden_total' - 'orden_propina')
 * to avoid any issue regarding data types, transform the values to integer

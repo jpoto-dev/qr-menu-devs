@@ -5,7 +5,7 @@ Data transformation:
 3. group by 'orden_estado', 'dte_tipo' and count
 Table:
 * use transformed data
-* table title 'Cantidad estado ordenes por tipo de documento'
+* table title 'Cantidad total de ordenes por estado por tipo de documento'
 * use 'orden_estado' as row headers
 * use 'dte_tipo' as column headers
 * use count as cell value
