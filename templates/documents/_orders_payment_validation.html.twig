@@ -1,0 +1,190 @@
+{% set bf_o_data = bf_o %}
+
+<h3>Validacion pago completo</h3>
+<div class="validation-table-container">
+    <table id="fullPaymentTable" class="display">
+        <thead>
+            <tr>
+                <th>Orden ID</th>
+                <th>DTE Folio</th>
+                <th>DTE Total</th>
+                <th>Orden Total</th>
+            </tr>
+        </thead>
+        <tbody id="fullPaymentBody">
+            <!-- Populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<h3>Validacion pago separado</h3>
+<div class="validation-table-container">
+    <table id="splitPaymentTable" class="display">
+        <thead>
+            <tr>
+                <th>Orden ID</th>
+                <th>DTE Folios</th>
+                <th>Sum DTE Total</th>
+                <th>Orden Total</th>
+            </tr>
+        </thead>
+        <tbody id="splitPaymentBody">
+            <!-- Populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<h3>Validacion pago conjunto</h3>
+<div class="validation-table-container">
+    <table id="bulkPaymentTable" class="display">
+        <thead>
+            <tr>
+                <th>DTE Folio</th>
+                <th>Orden IDs</th>
+                <th>DTE Total</th>
+                <th>Sum Orden Total</th>
+            </tr>
+        </thead>
+        <tbody id="bulkPaymentBody">
+            <!-- Populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bfOData = {{ bf_o_data|json_encode|raw }};
+
+    // Filter out rows where orden_id is null and dte_revision_estado meets criteria
+    const filteredData = bfOData.filter(row => row.orden_id != null && row.dte_revision_estado != null && ['DTE', 'EPR', 'RPR', 'RLV'].some(prefix => row.dte_revision_estado.startsWith(prefix)));
+
+    // Group by orden_id
+    const ordenGroups = {};
+    filteredData.forEach(row => {
+        const ordenId = row.orden_id;
+        if (!ordenGroups[ordenId]) {
+            ordenGroups[ordenId] = {
+                orden_total: parseInt(row.orden_total - row.orden_propina),
+                dtes: []
+            };
+        }
+        ordenGroups[ordenId].dtes.push({
+            dte_folio: row.dte_folio,
+            dte_total: parseInt(row.dte_total)
+        });
+    });
+
+    // Group by dte_folio
+    const dteGroups = {};
+    filteredData.forEach(row => {
+        const folio = row.dte_folio;
+        if (!dteGroups[folio]) {
+            dteGroups[folio] = {
+                dte_total: parseInt(row.dte_total),
+                ordens: []
+            };
+        }
+        dteGroups[folio].ordens.push({
+            orden_id: row.orden_id,
+            orden_total: parseInt(row.orden_total - row.orden_propina)
+        });
+    });
+
+    // Full payment validation
+    const fullPaymentBody = document.getElementById('fullPaymentBody');
+    Object.keys(ordenGroups).forEach(ordenId => {
+        const group = ordenGroups[ordenId];
+        if (group.dtes.length === 1) {
+            const dte = group.dtes[0];
+            if (parseInt(dte.dte_total) !== parseInt(group.orden_total)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${ordenId}</td>
+                    <td>${dte.dte_folio}</td>
+                    <td>${parseInt(dte.dte_total)}</td>
+                    <td>${parseInt(group.orden_total)}</td>
+                `;
+                fullPaymentBody.appendChild(row);
+            }
+        }
+    });
+
+    // Split payment validation
+    const splitPaymentBody = document.getElementById('splitPaymentBody');
+    Object.keys(ordenGroups).forEach(ordenId => {
+        const group = ordenGroups[ordenId];
+        if (group.dtes.length > 1) {
+            const sumDte = group.dtes.reduce((sum, dte) => sum + parseInt(dte.dte_total), 0);
+            if (parseInt(sumDte) !== parseInt(group.orden_total)) {
+                const folios = group.dtes.map(dte => dte.dte_folio).join(', ');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${ordenId}</td>
+                    <td>${folios}</td>
+                    <td>${parseInt(sumDte)}</td>
+                    <td>${parseInt(group.orden_total)}</td>
+                `;
+                splitPaymentBody.appendChild(row);
+            }
+        }
+    });
+
+    // Bulk payment validation
+    const bulkPaymentBody = document.getElementById('bulkPaymentBody');
+    Object.keys(dteGroups).forEach(folio => {
+        const group = dteGroups[folio];
+        if (group.ordens.length > 1) {
+            const sumOrden = group.ordens.reduce((sum, orden) => sum + parseInt(orden.orden_total), 0);
+            if (parseInt(group.dte_total) !== parseInt(sumOrden)) {
+                const ordenIds = group.ordens.map(orden => orden.orden_id).join(', ');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${folio}</td>
+                    <td>${ordenIds}</td>
+                    <td>${parseInt(group.dte_total)}</td>
+                    <td>${parseInt(sumOrden)}</td>
+                `;
+                bulkPaymentBody.appendChild(row);
+            }
+        }
+    });
+
+    // Initialize DataTables
+    $('#fullPaymentTable').DataTable();
+    $('#splitPaymentTable').DataTable();
+    $('#bulkPaymentTable').DataTable();
+});
+</script>
+
+<style>
+.validation-table-container {
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.display {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.display th, .display td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.display th {
+    background-color: #f2f2f2;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+    .validation-table-container {
+        font-size: 14px;
+    }
+
+    .display th, .display td {
+        padding: 4px;
+    }
+}
+</style>
