@@ -47,6 +47,11 @@ Componentes:
 ```
 
 ### Como ejecutar
+En primer lugar se debe configurar `DATABASE_URL` en el archivo `.env`:
+```txt
+DATABASE_URL="mysql://username:password@server_url:port/database"
+```
+
 Este proyecto utiliza Docker y Docker Compose y esta estructurado para ser ejecutado como dev container.
 
 Si no se desea utilizar como dev container, para ejecutarlo:
@@ -56,9 +61,16 @@ docker compose up -d
 docker compose exec app symfony serve --allow-all-ip
 ```
 
+No olvidar ejecutar `composer install` para instalar las dependencias
+
 Para parar el servidor:
 ```bash
 docker compose exec app symfony server:stop
+```
+
+Las siguientes rutas se encuentran disponibles en la aplicacion.
+```txt
+http://localhost:8000/documents
 ```
 
 ### Limites PHP runtime
