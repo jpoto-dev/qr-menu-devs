@@ -2,6 +2,13 @@ SELECT
 	DTE.id AS bf_id,
 	DTE.tienda_id AS bf_tienda_id,
 	DTE.dte AS bf_tipo_id,
+	CASE
+		WHEN DTE.dte = 33 THEN 'FACTURA ELECTRONICA'
+		WHEN DTE.dte = 39 THEN 'BOLETA ELECTRONICA'
+		WHEN DTE.dte = 41 THEN 'BOLETA ELECTRONICA EXENTA'
+		WHEN DTE.dte = 56 THEN 'NOTA DE DEBITO ELECTRONICA'
+		WHEN DTE.dte = 61 THEN 'NOTA DE CREDITO ELECTRONICA'
+	END AS bf_tipo,	
 	DTE.folio AS bf_folio,
 	DTE.exento AS bf_exento,
 	DTE.neto AS bf_neto,
@@ -22,7 +29,15 @@ SELECT
 	DTERV.revision_detalle AS nc_revision_detalle,
 	O.id AS orden_id,
 	O.tienda_id AS orden_tienda_id,
-	O.estado AS orden_estado
+	O.estado AS orden_estado,
+	CASE
+		WHEN O.monto = DTE.neto AND O.dte = 33 THEN ROUND(O.monto * 1.19, 0)
+		ELSE O.monto
+	END AS orden_monto,
+	CASE
+		WHEN O.monto = DTE.neto AND O.dte = 33 THEN ROUND((O.total - O.propina) * 1.19, 0)
+		ELSE O.total
+	END AS orden_total	
 FROM dte_emitido AS DTE
 INNER JOIN dte_referencia AS DTER ON 
 	DTER.tienda_id IN (:tiendas)

@@ -1,0 +1,109 @@
+{% set bf_nc_o_data = bf_nc_o %}
+
+<h3>Validacion notas de credito</h3>
+<div class="validation-table-container">
+    <table id="creditNotesValidationTable" class="display">
+        <thead>
+            <tr>
+                <th>Tipo de documento</th>
+                <th>Folio DTE</th>
+                <th>Folio nota de credito</th>
+                <th>Total DTE</th>
+                <th>Total nota de credito</th>
+                <th>Diferencia</th>
+            </tr>
+        </thead>
+        <tbody id="creditNotesValidationBody">
+            <!-- Populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bfNcOData = {{ bf_nc_o_data|json_encode|raw }};
+
+    // Data transformation
+    let transformedData = bfNcOData.filter(row => {
+        // 1. filter by 'nc_revision_estado' where is not null and starts with DTE, EPR, RPR, or RLV
+        const ncEstado = row.nc_revision_estado;
+        if (!ncEstado || !['DTE', 'EPR', 'RPR', 'RLV'].some(prefix => ncEstado.startsWith(prefix))) return false;
+
+        // 2. filter by 'bf_revision_estado' where is not null and starts with DTE, EPR, RPR, or RLV
+        const bfEstado = row.bf_revision_estado;
+        if (!bfEstado || !['DTE', 'EPR', 'RPR', 'RLV'].some(prefix => bfEstado.startsWith(prefix))) return false;
+
+        return true;
+    });
+
+    // 3. pick distincts 'bf_tipo', 'bf_folio', 'bf_total', 'nc_folio', 'nc_total'
+    const seen = new Set();
+    transformedData = transformedData.filter(row => {
+        const key = `${row.bf_tipo}-${row.bf_folio}-${row.bf_total}-${row.nc_folio}-${row.nc_total}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+
+    // 4. filter where 'nc_total' > 'bf_total'; cast types to integer if it's needed
+    transformedData = transformedData.filter(row => {
+        const ncTotal = parseInt(row.nc_total, 10);
+        const bfTotal = parseInt(row.bf_total, 10);
+        return ncTotal > bfTotal;
+    });
+
+    // Populate table
+    const body = document.getElementById('creditNotesValidationBody');
+    transformedData.forEach(row => {
+        const ncTotal = parseInt(row.nc_total, 10);
+        const bfTotal = parseInt(row.bf_total, 10);
+        const diferencia = ncTotal - bfTotal;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row.bf_tipo}</td>
+            <td>${row.bf_folio}</td>
+            <td>${row.nc_folio}</td>
+            <td>${bfTotal}</td>
+            <td>${ncTotal}</td>
+            <td>${diferencia}</td>
+        `;
+        body.appendChild(tr);
+    });
+
+    // Initialize DataTable
+    $('#creditNotesValidationTable').DataTable();
+});
+</script>
+
+<style>
+.validation-table-container {
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.display {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.display th, .display td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.display th {
+    background-color: #f2f2f2;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+    .validation-table-container {
+        font-size: 14px;
+    }
+
+    .display th, .display td {
+        padding: 4px;
+    }
+}
+</style>
