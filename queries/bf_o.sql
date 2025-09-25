@@ -23,6 +23,7 @@ SELECT
 	DTE.revision_estado AS dte_revision_estado,
 	DTE.revision_detalle AS dte_revision_detalle,
 	DTE.anulado AS dte_anulado,
+	DTE.created AS dte_created,
 	DTE.deleted AS dte_deleted,
 	O.id AS orden_id,
 	O.tienda_id AS orden_tienda_id,

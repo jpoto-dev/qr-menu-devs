@@ -8,7 +8,7 @@
 {% set unique_filtered = [] %}
 {% set keys = [] %}
 {% for item in filtered %}
-    {% set key = item.dte_fecha ~ '-' ~ item.dte_tipo ~ '-' ~ item.dte_folio ~ '-' ~ item.dte_total %}
+    {% set key = item.dte_created ~ '-' ~ item.dte_tipo ~ '-' ~ item.dte_folio ~ '-' ~ item.dte_total %}
     {% if key not in keys %}
         {% set keys = keys|merge([key]) %}
         {% set unique_filtered = unique_filtered|merge([item]) %}
@@ -18,8 +18,9 @@
 {% set dates = [] %}
 {% set tipos = [] %}
 {% for item in unique_filtered %}
-    {% if item.dte_fecha not in dates %}
-        {% set dates = dates|merge([item.dte_fecha]) %}
+    {% set day = item.dte_created|date('Y-m-d') %}
+    {% if day not in dates %}
+        {% set dates = dates|merge([day]) %}
     {% endif %}
     {% if item.dte_tipo not in tipos %}
         {% set tipos = tipos|merge([item.dte_tipo]) %}
@@ -40,7 +41,7 @@
     {% for date in dates %}
         {% set sum = 0 %}
         {% for item in unique_filtered %}
-            {% if item.dte_fecha == date and item.dte_tipo == tipo %}
+            {% if item.dte_created|date('Y-m-d') == date and item.dte_tipo == tipo %}
                 {% set sum = sum + item.dte_total %}
             {% endif %}
         {% endfor %}
@@ -80,7 +81,7 @@
                 }
             },
             title: {
-                text: 'Ventas'
+                text: 'Montos'
             }
         },
         tooltip: {

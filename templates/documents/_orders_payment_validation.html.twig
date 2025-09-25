@@ -1,14 +1,14 @@
 {% set bf_o_data = bf_o %}
 
-<h3>Validacion pago completo</h3>
+<h3>Validacion pago completo de orden</h3>
 <div class="validation-table-container">
     <table id="fullPaymentTable" class="display">
         <thead>
             <tr>
-                <th>Orden ID</th>
-                <th>DTE Folio</th>
-                <th>DTE Total</th>
-                <th>Orden Total</th>
+                <th>Orden</th>
+                <th>Folio DTE</th>
+                <th>Total DTE</th>
+                <th>Total orden</th>
             </tr>
         </thead>
         <tbody id="fullPaymentBody">
@@ -17,15 +17,15 @@
     </table>
 </div>
 
-<h3>Validacion pago separado</h3>
+<h3>Validacion pago separado de orden</h3>
 <div class="validation-table-container">
     <table id="splitPaymentTable" class="display">
         <thead>
             <tr>
-                <th>Orden ID</th>
-                <th>DTE Folios</th>
-                <th>Sum DTE Total</th>
-                <th>Orden Total</th>
+                <th>Orden</th>
+                <th>Folios DTE</th>
+                <th>Total DTEs</th>
+                <th>Total orden</th>
             </tr>
         </thead>
         <tbody id="splitPaymentBody">
@@ -34,15 +34,15 @@
     </table>
 </div>
 
-<h3>Validacion pago conjunto</h3>
+<h3>Validacion pago multiples ordenes</h3>
 <div class="validation-table-container">
     <table id="bulkPaymentTable" class="display">
         <thead>
             <tr>
-                <th>DTE Folio</th>
-                <th>Orden IDs</th>
-                <th>DTE Total</th>
-                <th>Sum Orden Total</th>
+                <th>Folio DTE</th>
+                <th>Ordenes</th>
+                <th>Total DTE</th>
+                <th>Total ordenes</th>
             </tr>
         </thead>
         <tbody id="bulkPaymentBody">
