@@ -8,7 +8,23 @@
     {% include 'documents/_filters.html.twig' %}
 
     {% include 'documents/_issued_documents.html.twig' %}
-{% endblock %}
+
+    {% include 'documents/_total_per_day.html.twig' %}
+
+    {#
+
+    {% include 'documents/_pending_to_send.html.twig' %}
+
+    {% include 'documents/_mop_grouping.html.twig' %}
+
+    {% include 'documents/_order_status_grouping.html.twig' %}
+
+    {% include 'documents/_orders_payment_validation.html.twig' %}
+
+    {% include 'documents/_credit_notes_validation.html.twig' %}
+    
+    #}
+  {% endblock %}
 {% block javascripts %}
 {{ parent() }}
 {% endblock %}

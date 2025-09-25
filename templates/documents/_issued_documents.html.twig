@@ -1,4 +1,5 @@
 {% set bf_o_data = bf_o %}
+<h3>Documentos emitidos por tipo</h3>
 <div class="issued-documents-table">
     <table id="issuedDocumentsTable">
         <thead>
@@ -18,14 +19,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const bfOData = {{ bf_o_data|json_encode|raw }};
     const grouped = {};
 
-    // Group by dte_tipo and collect unique dte_folio
+    // Filter and group by dte_tipo and collect unique dte_folio
     bfOData.forEach(item => {
-        const tipo = item.dte_tipo;
-        const folio = item.dte_folio;
-        if (!grouped[tipo]) {
-            grouped[tipo] = new Set();
+        if (item.dte_revision_estado && (item.dte_revision_estado.startsWith('DTE') || item.dte_revision_estado.startsWith('EPR') || item.dte_revision_estado.startsWith('RPR') || item.dte_revision_estado.startsWith('RLV'))) {
+            const tipo = item.dte_tipo;
+            const folio = item.dte_folio;
+            if (!grouped[tipo]) {
+                grouped[tipo] = new Set();
+            }
+            grouped[tipo].add(folio);
         }
-        grouped[tipo].add(folio);
     });
 
     const tableBody = document.getElementById('tableBody');

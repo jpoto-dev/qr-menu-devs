@@ -2,6 +2,10 @@ SELECT
 	DTE.id AS dte_id, 
 	DTE.orden_id AS dte_orden_id, 
 	DTE.fecha AS dte_fecha,
+	CASE
+		WHEN DTE.ted IS NULL THEN 1
+		ELSE 0
+	END AS dte_estado_envio,
 	DTE.dte AS dte_tipo_id,
 	CASE
 		WHEN DTE.dte = 33 THEN 'FACTURA ELECTRONICA'
@@ -9,6 +13,7 @@ SELECT
 		WHEN DTE.dte = 41 THEN 'BOLETA ELECTRONICA EXENTA'
 		WHEN DTE.dte = 56 THEN 'NOTA DE DEBITO ELECTRONICA'
 		WHEN DTE.dte = 61 THEN 'NOTA DE CREDITO ELECTRONICA'
+		ELSE 'DOCUMENTO NO IDENTIFICADO'
 	END AS dte_tipo,
 	DTE.folio AS dte_folio, 
 	DTE.exento AS dte_exento, 

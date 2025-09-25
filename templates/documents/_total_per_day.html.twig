@@ -1,0 +1,97 @@
+{% set filtered = [] %}
+{% for item in bf_o %}
+    {% if item.dte_revision_estado is not null and (item.dte_revision_estado starts with 'DTE' or item.dte_revision_estado starts with 'EPR' or item.dte_revision_estado starts with 'RPR' or item.dte_revision_estado starts with 'RLV') and item.dte_total is not null and item.dte_total > 0 %}
+        {% set filtered = filtered|merge([item]) %}
+    {% endif %}
+{% endfor %}
+
+{% set unique_filtered = [] %}
+{% set keys = [] %}
+{% for item in filtered %}
+    {% set key = item.dte_fecha ~ '-' ~ item.dte_tipo ~ '-' ~ item.dte_folio ~ '-' ~ item.dte_total %}
+    {% if key not in keys %}
+        {% set keys = keys|merge([key]) %}
+        {% set unique_filtered = unique_filtered|merge([item]) %}
+    {% endif %}
+{% endfor %}
+
+{% set dates = [] %}
+{% set tipos = [] %}
+{% for item in unique_filtered %}
+    {% if item.dte_fecha not in dates %}
+        {% set dates = dates|merge([item.dte_fecha]) %}
+    {% endif %}
+    {% if item.dte_tipo not in tipos %}
+        {% set tipos = tipos|merge([item.dte_tipo]) %}
+    {% endif %}
+{% endfor %}
+
+{% set dates = dates|sort %}
+{% set tipos = tipos|sort %}
+
+{% set categories = [] %}
+{% for date in dates %}
+    {% set categories = categories|merge([date|date('d-m-Y')]) %}
+{% endfor %}
+
+{% set series = [] %}
+{% for tipo in tipos %}
+    {% set data = [] %}
+    {% for date in dates %}
+        {% set sum = 0 %}
+        {% for item in unique_filtered %}
+            {% if item.dte_fecha == date and item.dte_tipo == tipo %}
+                {% set sum = sum + item.dte_total %}
+            {% endif %}
+        {% endfor %}
+        {% set data = data|merge([sum]) %}
+    {% endfor %}
+    {% set series = series|merge([{'name': tipo, 'data': data}]) %}
+{% endfor %}
+
+<div id="totalPerDayChart"></div>
+
+<script>
+    var options = {
+        series: {{ series|json_encode|raw }},
+        chart: {
+            type: 'bar',
+            stacked: true,
+            height: 350
+        },
+        title: {
+            text: 'Total de documentos enviados por dia y por tipo'
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        xaxis: {
+            categories: {{ categories|json_encode|raw }},
+        },
+        yaxis: {
+            labels: {
+                formatter: function (value) {
+                    return '$' + value.toLocaleString();
+                }
+            },
+            title: {
+                text: 'Ventas'
+            }
+        },
+        tooltip: {
+            y: {
+                formatter: function (value) {
+                    return '$' + value.toLocaleString();
+                }
+            }
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#totalPerDayChart"), options);
+    chart.render();
+</script>
