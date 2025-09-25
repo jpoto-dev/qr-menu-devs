@@ -1,0 +1,75 @@
+{% set bf_o_data = bf_o %}
+<h3>Documentos por enviar por tipo</h3>
+<div class="pending-to-send-table">
+    <table id="pendingToSendTable">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody id="pendingTableBody">
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bfOData = {{ bf_o_data|json_encode|raw }};
+    const grouped = {};
+
+    // Filter by dte_estado_envio == 1 and group by dte_tipo, collect unique dte_folio
+    bfOData.forEach(item => {
+        if (item.dte_estado_envio === 1) {
+            const tipo = item.dte_tipo;
+            const folio = item.dte_folio;
+            if (!grouped[tipo]) {
+                grouped[tipo] = new Set();
+            }
+            grouped[tipo].add(folio);
+        }
+    });
+
+    const tableBody = document.getElementById('pendingTableBody');
+    let totalCount = 0;
+
+    // Populate table rows
+    Object.keys(grouped).forEach(tipo => {
+        const count = grouped[tipo].size;
+        totalCount += count;
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${tipo}</td><td>${count}</td>`;
+        tableBody.appendChild(row);
+    });
+
+    // Add total row
+    const totalRow = document.createElement('tr');
+    totalRow.innerHTML = `<td><strong>Total</strong></td><td><strong>${totalCount}</strong></td>`;
+    tableBody.appendChild(totalRow);
+});
+</script>
+
+<style>
+.pending-to-send-table {
+    width: 100%;
+    overflow-x: auto;
+}
+#pendingToSendTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+#pendingToSendTable th, #pendingToSendTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+#pendingToSendTable th {
+    background-color: #f2f2f2;
+}
+@media (max-width: 768px) {
+    .pending-to-send-table {
+        font-size: 14px;
+    }
+}
+</style>
