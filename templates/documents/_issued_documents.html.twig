@@ -8,7 +8,7 @@
                 <th>Cantidad</th>
             </tr>
         </thead>
-        <tbody id="tableBody">
+        <tbody id="issuedTableBody">
             <!-- Rows will be populated by JavaScript -->
         </tbody>
     </table>
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    const tableBody = document.getElementById('tableBody');
+    const tableBody = document.getElementById('issuedTableBody');
     let totalCount = 0;
 
     // Populate table rows

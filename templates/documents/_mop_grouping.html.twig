@@ -1,0 +1,139 @@
+{% set bf_o_data = bf_o %}
+<h3>Total medios de pago por tipo de documento</h3>
+<div class="mop-grouping-table">
+    <table id="mopGroupingTable">
+        <thead>
+            <tr>
+                <th>Medio de Pago</th>
+                <!-- Column headers will be populated by JavaScript -->
+            </tr>
+        </thead>
+        <tbody id="mopTableBody">
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+        <tfoot id="tableFooter">
+            <!-- Footer will be populated by JavaScript -->
+        </tfoot>
+    </table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bfOData = {{ bf_o_data|json_encode|raw }};
+
+    const formatCurrency = (val) => val.toLocaleString(navigator.language || 'en-US', { style: 'currency', currency: 'USD' });
+
+    // Filter data
+    const filtered = bfOData.filter(item =>
+        item.dte_revision_estado &&
+        (item.dte_revision_estado.startsWith('DTE') ||
+         item.dte_revision_estado.startsWith('EPR') ||
+         item.dte_revision_estado.startsWith('RPR') ||
+         item.dte_revision_estado.startsWith('RLV')) &&
+        item.dte_orden_id != null
+    );
+
+    // Pick unique 'dte', 'dte_folio', 'dte_total'
+    const uniqueFiltered = [];
+    const seen = new Set();
+    filtered.forEach(item => {
+        const key = `${item.dte}-${item.dte_folio}-${item.dte_total}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueFiltered.push(item);
+        }
+    });
+
+    // Group and sum
+    const sums = {};
+    uniqueFiltered.forEach(item => {
+        const medio = item.orden_medio_pago;
+        const tipo = item.dte_tipo;
+        const total = parseFloat(item.dte_total) || 0;
+        if (!sums[medio]) sums[medio] = {};
+        if (!sums[medio][tipo]) sums[medio][tipo] = 0;
+        sums[medio][tipo] += total;
+    });
+
+    // Get unique medios and tipos
+    const medios = Object.keys(sums);
+    const tiposSet = new Set();
+    medios.forEach(medio => {
+        Object.keys(sums[medio]).forEach(tipo => tiposSet.add(tipo));
+    });
+    const tipos = Array.from(tiposSet);
+
+    // Populate table header
+    const theadRow = document.querySelector('#mopGroupingTable thead tr');
+    tipos.forEach(tipo => {
+        const th = document.createElement('th');
+        th.textContent = tipo;
+        theadRow.appendChild(th);
+    });
+    const totalTh = document.createElement('th');
+    totalTh.textContent = 'Total';
+    theadRow.appendChild(totalTh);
+
+    // Populate table body
+    const tableBody = document.getElementById('mopTableBody');
+    let grandTotal = 0;
+    const colTotals = {};
+    tipos.forEach(tipo => colTotals[tipo] = 0);
+
+    medios.forEach(medio => {
+        const row = document.createElement('tr');
+        let rowHtml = `<td>${medio}</td>`;
+        let rowTotal = 0;
+        tipos.forEach(tipo => {
+            const val = sums[medio][tipo] || 0;
+            rowHtml += `<td>${formatCurrency(val)}</td>`;
+            rowTotal += val;
+            colTotals[tipo] += val;
+        });
+        rowHtml += `<td><strong>${formatCurrency(rowTotal)}</strong></td>`;
+        row.innerHTML = rowHtml;
+        tableBody.appendChild(row);
+        grandTotal += rowTotal;
+    });
+
+    // Add total row
+    const totalRow = document.createElement('tr');
+    let totalRowHtml = `<td><strong>Total</strong></td>`;
+    tipos.forEach(tipo => {
+        totalRowHtml += `<td><strong>${formatCurrency(colTotals[tipo])}</strong></td>`;
+    });
+    totalRowHtml += `<td><strong>${formatCurrency(grandTotal)}</strong></td>`;
+    totalRow.innerHTML = totalRowHtml;
+    tableBody.appendChild(totalRow);
+
+    // Add footer
+    const tableFooter = document.getElementById('tableFooter');
+    const footerRow = document.createElement('tr');
+    footerRow.innerHTML = `<td colspan="${tipos.length + 2}">Total: ${formatCurrency(grandTotal)}</td>`;
+    tableFooter.appendChild(footerRow);
+});
+</script>
+
+<style>
+.mop-grouping-table {
+    width: 100%;
+    overflow-x: auto;
+}
+#mopGroupingTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+#mopGroupingTable th, #mopGroupingTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+#mopGroupingTable th {
+    background-color: #f2f2f2;
+}
+@media (max-width: 768px) {
+    .mop-grouping-table {
+        font-size: 14px;
+    }
+}
+</style>
